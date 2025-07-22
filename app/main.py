@@ -4,10 +4,11 @@ from app.solver import dijkstra
 
 app = FastAPI()
 
+@app.post("/route", response_model=RouteResponse)
 def compute_route(req: RouteRequest):
     if req.algorithm == "dijkstra":
         path, cost = dijkstra(req.grid, req.start, req.end)
     else:
-        return {"path": [], "cost": -1} # fallback
+        return RouteResponse(path=[], cost=-1)
     
     return RouteResponse(path=path, cost=cost)
