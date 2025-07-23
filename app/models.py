@@ -5,7 +5,7 @@ class RouteRequest(BaseModel):
     grid: List[List[int]]
     start: Tuple[int, int]
     end: Tuple[int, int]
-    algorithm: Literal["dijkstra"] = "dijkstra"
+    algorithm: Literal["dijkstra", "astar"] = "astar"
 
 class RouteResponse(BaseModel):
     path: List[Tuple[int, int]]
