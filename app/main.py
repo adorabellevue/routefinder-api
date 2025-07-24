@@ -1,11 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from app.models import RouteRequest, RouteResponse
 from app.solver import dijkstra, astar
+from app.cache import generate_cache_key, get_cached_value, set_cached_value
 
 app = FastAPI()
 
 @app.post("/route", response_model=RouteResponse)
 def compute_route(req: RouteRequest):
+    key = generate_cache_key(req.grid, req.start, req.end, req.algorithm)
+    cached = get_cached_value(key)
+    if cached:
+        return RouteResponse(**cached)
+
     if req.algorithm == "dijkstra":
         path, cost = dijkstra(req.grid, req.start, req.end)
     elif req.algorithm == "astar":
@@ -13,4 +19,5 @@ def compute_route(req: RouteRequest):
     else:
         raise HTTPException(status_code=400, detail="Unsupported algorithm")
     
-    return RouteResponse(path=path, cost=cost)
+    set_cached_value(key, {"path": path, "cost": cost})
+    return RouteResponse(**cached)
